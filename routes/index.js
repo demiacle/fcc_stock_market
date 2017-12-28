@@ -1,12 +1,18 @@
 var express = require('express');
 var router = express.Router();
-var queryStockMarket = require('../server/queryStockMarket.server.js')
+var stockMarket = require('../server/queryStockMarket.server.js')
+
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  queryStockMarket();
-  res.render('index', { title: 'Express' });
+router.get('/', async function(req, res, next) {
+  var results = await stockMarket.queryDefault();
+  console.log( results )
+  res.render('index', { stocks: JSON.stringify( results ) } );
 });
+
+router.get('/addData/:data', function(req, res) {
+  res.send('add some new data')
+})
 
 
 module.exports = router;

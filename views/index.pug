@@ -1,5 +1,132 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  div#titleContainer
+    h1 
+      | Stocks
+  // TODO change values to today and a year ago from today
+  div#datePickerContainer
+    | From
+    input( type="text" id="datePickerStart" value="Thu Dec 07 2016")
+    | To
+    input( type="text" id="datePickerEnd" value="Thu Dec 07 2017")
+  canvas#mainChart
+  // TODO change legend to html and place a button to remove from display and a button to remove dataset
+  
+  div#addStockContainer
+    div#nasdaqContainer
+      h3 
+        | Search NASDAQ
+      form( action="/search/NASDAQ" method="POST")
+        input( type="text" id="nasdaqQuery" placeholder="Stock Code" )
+        input( type="submit" value="Add" )
+
+    div#nyseContainer
+      h3 
+        | Search NYSE
+      form( action="/search/NYSE" method="POST")
+        input( type="text" id="nyseQuery" placeholder="Stock Code" )
+        input( type="submit" value="Add" )
+  p#footer
+    | *built by 
+    a(href="https://twitter.com/Demiacle") Daniel Escobedo
+    |  using 
+    a(href="https://www.npmjs.com/package/google-finance") google-finance 
+    | and 
+    a(href="https://github.com/dbushell/Pikaday") Pikaday
+  script.
+    Chart.defaults.LineWithLine = Chart.defaults.line;
+    Chart.controllers.LineWithLine = Chart.controllers.line.extend({
+      draw: function(ease) {
+          Chart.controllers.line.prototype.draw.call(this, ease);
+
+          if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+            var activePoint = this.chart.tooltip._active[0],
+                ctx = this.chart.ctx,
+                x = activePoint.tooltipPosition().x,
+                topY = this.chart.scales['y-axis-0'].top,
+                bottomY = this.chart.scales['y-axis-0'].bottom;
+
+            // draw line
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x, topY);
+            ctx.lineTo(x, bottomY);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#07C';
+            ctx.stroke();
+            ctx.restore();
+          }
+      }
+    });
+    // '!{variable}' renders a pug unescaped string
+    var stocks = JSON.parse( '!{stocks}' )
+    console.log( stocks )
+    function initializeChart( data ){
+      var ctx = document.getElementById('mainChart').getContext('2d');
+      var chart = new Chart(ctx, {
+        type: 'LineWithLine',
+        data: {
+          labels: ["January", "February", "March", "April", "May", "June", "July"],
+          datasets: [{
+            label: "My First dataset",
+            lineTension: 0,
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [0, 10, 5, 2, 20, 30, 45],
+            fill: false
+          },{
+            label: "My First dataset",
+            lineTension: 0,
+            backgroundColor: 'rgb(0, 99, 132)',
+            borderColor: 'rgb(0, 99, 132)',
+            data: [0, 2, 10, 11, 10, 20, 35],
+            fill: false
+          }
+          ]
+        },
+
+        // Configuration options go here
+        options: {
+          responsive: false,
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true
+            }
+          },
+          tooltips: {
+            intersect: false,
+            mode: 'index'
+          },
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
+    }
+
+    initializeChart();
+
+    function addData( chart, label, data ){
+      chart.data.labels.push(label);
+      chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+      });
+      chart.update();
+    }
+
+    function removeData( chart ){
+      delete chart.data.labels.pop();
+      chart.data.datasets.forEach((dataset)=>{
+        dataset.data.pop();
+      })
+      chart.update();
+    }
+
+    var picker = new Pikaday({ field: document.getElementById('datePickerStart')})
+    var picker = new Pikaday({ field: document.getElementById('datePickerEnd')})

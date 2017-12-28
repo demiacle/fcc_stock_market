@@ -1,8 +1,72 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #fafdff;
+}
+
+h1, p, div, input {
+  color: #525252;
 }
 
 a {
   color: #00B7FF;
+}
+#footer {
+  text-align: center;
+  margin-top: 80px;
+}
+#container {
+  width: 1100px;
+  margin: auto;
+}
+#titleContainer h1, #titleContainer p {
+  text-align: center;
+}
+#mainChart {
+  width: 900px;
+  margin: auto;
+}
+#datePickerContainer {
+  text-align: center;
+  border-bottom: 1px solid #ffa0a0;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+}
+#datePickerContainer input {
+  cursor: pointer;
+  border: 1px solid #ffa0a0;
+  padding: 5px;
+  width: 109px;
+  margin-left: 7px;
+  margin-right: 7px;
+}
+#addStockContainer div {
+  display: inline-block;
+  padding: 0 40px;
+  margin-top: 20px;
+}
+#addStockContainer {
+  text-align: center;
+}
+#addStockContainer input[type="text"] {
+  border: 1px solid #ffcccc;
+  border-radius: 8px 0 0 8px;
+  padding: 6px;
+}
+#addStockContainer input[type="submit"] {
+  border: 1px solid #ffcccc;
+  border-radius: 0 8px 8px 0;
+  padding: 6px;
+  background-color: #e5eff6;
+  cursor: pointer;
+}
+#addStockContainer input[type="submit"]:hover {
+  background-color: #a4c1d4;;
+}
+#addStockContainer input[type="submit"]:active {
+  position: relative;
+  top: 1px;
+}
+#nasdaqContainer {
+  border-right: 1px solid #ffa0a0;
 }
