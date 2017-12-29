@@ -39,6 +39,11 @@ function removeStock( localStorage, stockID, ws ){
 async function addStock( localStorage, stockID, ws ){
     console.log('adding :' + stockID)
     var trackingStock = JSON.parse(localStorage.getItem('trackingStock'))
+    if( trackingStock.stocks.length > 9 ){
+        ws.send( JSON.stringify({ type: 'fail', messege: 'A maximum of 10 stocks may be tracked at a time' } ) )
+        return;
+    }
+
     var stockFound = await queryStockMarket( [stockID], trackingStock.startDate, trackingStock.endDate );
     if( stockFound[0].dataset.length > 0 ){
         trackingStock.stocks.push(stockID)
