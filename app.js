@@ -13,11 +13,16 @@ var app = express();
 // Load local storage
 localStorage = new localStorage('localStorage')
 if( localStorage.getItem('trackingStock') === null ){
-  localStorage.setItem('trackingStock', 'test')// TODO SET DEFAULTS
+  var defaults = {
+    stocks: ['NASDAQ:FB', 'NASDAQ:AAPL', 'NASDAQ:AMZN', 'NYSE:TWTR', 'NASDAQ:GOOGL'],
+    startDate: '2016-11-30', 
+    endDate: '2017-11-30'
+  }
+  localStorage.setItem('trackingStock', JSON.stringify( defaults ) )
 }
 // Middleware to pass local storage to router
 function passLocalStorage( req, res, next) {
-  res.locals.localStorage = localStorage.getItem("trackingStock");
+  res.locals.localStorage = JSON.parse( localStorage.getItem("trackingStock") );
   next(); 
 }
 

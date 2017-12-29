@@ -67,9 +67,6 @@ a {
   position: relative;
   top: 1px;
 }
-#nasdaqContainer {
-  border-right: 1px solid #ffa0a0;
-}
 
 .legendColor {
   border-radius: 10px;

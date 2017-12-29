@@ -17,17 +17,11 @@ block content
   div#addStockContainer
     div#nasdaqContainer
       h3 
-        | Search NASDAQ
-      form( action="/search/NASDAQ" method="POST")
+        | Search stock
+      form#nasdaqForm
         input( type="text" id="nasdaqQuery" placeholder="Stock Code" required )
         input( type="submit" value="Add" )
 
-    div#nyseContainer
-      h3 
-        | Search NYSE
-      form( action="/search/NYSE" method="POST")
-        input( type="text" id="nyseQuery" placeholder="Stock Code" required )
-        input( type="submit" value="Add" )
   p#footer
     | *built by 
     a(href="https://twitter.com/Demiacle") Daniel Escobedo
@@ -82,7 +76,7 @@ block content
         fill: false
       }
     });
-    //console.log(datasets)
+    console.log(datasets)
 
     var chart;
     function initializeChart( data ){
@@ -123,14 +117,11 @@ block content
     }
 
     function buildCustomLegend(chart){
-      //console.log('chart is ')
-      //console.log(chart.legend)
-      console.log('buliding chart')
       var html = '';
       chart.legend.legendItems.forEach( i=> {
         html += `<div class="legendColor" style="background-color:${i.fillStyle};"></div>`;
         html += `<p class="legendText">${i.text}</p>`;
-        html += `<span class="removeStock" onclick="removeData('${i.text}', this)">x</span>`;
+        html += `<span class="removeStock" onclick="requestRemoveStock('${i.text}')">x</span>`;
       })
       
       return html;
@@ -138,33 +129,41 @@ block content
 
     initializeChart();
     
-    function addData( data ){
+    function addDataToChart( data ){
+      console.log( data )
+      return;
       chart.data.labels.push(label);
       chart.data.datasets.forEach((dataset) => {
         dataset.data.push(data);
       });
       chart.update();
     }
-
-    function removeData( stockID, element ){
-      ws.send( JSON.stringify( 
-        { 
-        type: 'remove',
-        stockID: stockID 
-        }
-      ));
-      console.log(element.parentElement)
-      console.log(stockID)
-      console.log( chart.data )
+    function removeDataFromChart( stockID ){
       for( var j = chart.data.datasets.length - 1; j >= 0; j-- ){
         if(  chart.data.datasets[j].label == stockID){
           chart.data.datasets.splice( j, 1 );
         }
       }
-      console.log( chart.data )
-      console.log('works')
       chart.update();
       updateLegend( chart );
+    }
+
+    document.getElementById('nasdaqForm').addEventListener('submit', event => {
+      event.preventDefault();
+      requestAddStock( document.getElementById('nasdaqQuery').value )
+    });
+    function requestAddStock( stockID ){
+      console.log(stockID)
+      ws.send( JSON.stringify( { 
+        type: 'add',
+        stockID: stockID 
+      }));
+    }
+    function requestRemoveStock( stockID ){
+      ws.send( JSON.stringify( { 
+        type: 'remove',
+        stockID: stockID 
+      }));
     }
     
     var toString = (date, format) => {
@@ -185,7 +184,18 @@ block content
     pickerStart.setDate( startDate )
     pickerEnd.setDate( endDate )
 
-    var ws = new WebSocket('ws://localhost:8080');
+    var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
     ws.onmessage = function (event) {
-      // update         
+      var response = JSON.parse( event.data )
+      console.log( response )
+      if( response.type == 'remove' ){
+        removeDataFromChart( response.stockID );
+      }
+      if( response.type == 'add' ){
+        addDataToChart( response.data )
+      }
+      if ( response.type == 'fail') {
+        // TODO place into a nice html element
+        alert( response.messege )
+      }
     };
