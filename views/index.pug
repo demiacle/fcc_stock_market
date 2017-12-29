@@ -3,29 +3,30 @@ extends layout
 block content
   div#titleContainer
     h1 
-      | Stocks
+      | Live stock tracker
   // TODO change values to today and a year ago from today
   div#datePickerContainer
     | From
-    input( type="text" id="datePickerStart" value="Thu Dec 07 2016")
+    input( type="text" id="datePickerStart")
     | To
-    input( type="text" id="datePickerEnd" value="Thu Dec 07 2017")
+    input( type="text" id="datePickerEnd")
   canvas#mainChart
   // TODO change legend to html and place a button to remove from display and a button to remove dataset
+  div#legend
   
   div#addStockContainer
     div#nasdaqContainer
       h3 
         | Search NASDAQ
       form( action="/search/NASDAQ" method="POST")
-        input( type="text" id="nasdaqQuery" placeholder="Stock Code" )
+        input( type="text" id="nasdaqQuery" placeholder="Stock Code" required )
         input( type="submit" value="Add" )
 
     div#nyseContainer
       h3 
         | Search NYSE
       form( action="/search/NYSE" method="POST")
-        input( type="text" id="nyseQuery" placeholder="Stock Code" )
+        input( type="text" id="nyseQuery" placeholder="Stock Code" required )
         input( type="submit" value="Add" )
   p#footer
     | *built by 
@@ -61,39 +62,44 @@ block content
     });
     // '!{variable}' renders a pug unescaped string
     var stocks = JSON.parse( '!{stocks}' )
-    console.log( stocks )
+    //console.log( stocks )
+    var xAxis = stocks[0].dataset.map(i=>{
+      return i.date.substring(0,10);
+    });
+    var niceColors = ['rgb(255, 99, 132)', 'rgb(0, 99, 132)', 'rgb(100, 200, 100)', 'rgb(200, 200, 0)', 'rgb( 0, 150, 230)'];
+    var startDate = xAxis[0];
+    var endDate = xAxis[ xAxis.length - 1 ];
+
+    var datasets = stocks.map( (item, index) => {
+      return {
+        label: item.stock,
+        lineTension: 0,
+        borderWidth: 1,
+        pointRadius: 0,
+        backgroundColor: niceColors[ index % niceColors.length ],
+        borderColor: niceColors[ index % niceColors.length ],
+        data: item.dataset.map( i=>{ return i.close }),
+        fill: false
+      }
+    });
+    //console.log(datasets)
+
+    var chart;
     function initializeChart( data ){
       var ctx = document.getElementById('mainChart').getContext('2d');
-      var chart = new Chart(ctx, {
+      chart = new Chart(ctx, {
         type: 'LineWithLine',
         data: {
-          labels: ["January", "February", "March", "April", "May", "June", "July"],
-          datasets: [{
-            label: "My First dataset",
-            lineTension: 0,
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
-            data: [0, 10, 5, 2, 20, 30, 45],
-            fill: false
-          },{
-            label: "My First dataset",
-            lineTension: 0,
-            backgroundColor: 'rgb(0, 99, 132)',
-            borderColor: 'rgb(0, 99, 132)',
-            data: [0, 2, 10, 11, 10, 20, 35],
-            fill: false
-          }
-          ]
+          labels: xAxis, // x axis
+          datasets: datasets
         },
 
         // Configuration options go here
         options: {
+          legendCallback: buildCustomLegend,
           responsive: false,
           legend: {
-            position: 'bottom',
-            labels: {
-              usePointStyle: true
-            }
+            display: false
           },
           tooltips: {
             intersect: false,
@@ -108,11 +114,31 @@ block content
           }
         }
       });
+
+      updateLegend( chart )
+    }
+
+    function updateLegend( chart ){
+      document.getElementById('legend').innerHTML = chart.generateLegend();
+    }
+
+    function buildCustomLegend(chart){
+      //console.log('chart is ')
+      //console.log(chart.legend)
+      console.log('buliding chart')
+      var html = '';
+      chart.legend.legendItems.forEach( i=> {
+        html += `<div class="legendColor" style="background-color:${i.fillStyle};"></div>`;
+        html += `<p class="legendText">${i.text}</p>`;
+        html += `<span class="removeStock" onclick="removeData('${i.text}', this)">x</span>`;
+      })
+      
+      return html;
     }
 
     initializeChart();
-
-    function addData( chart, label, data ){
+    
+    function addData( data ){
       chart.data.labels.push(label);
       chart.data.datasets.forEach((dataset) => {
         dataset.data.push(data);
@@ -120,13 +146,46 @@ block content
       chart.update();
     }
 
-    function removeData( chart ){
-      delete chart.data.labels.pop();
-      chart.data.datasets.forEach((dataset)=>{
-        dataset.data.pop();
-      })
+    function removeData( stockID, element ){
+      ws.send( JSON.stringify( 
+        { 
+        type: 'remove',
+        stockID: stockID 
+        }
+      ));
+      console.log(element.parentElement)
+      console.log(stockID)
+      console.log( chart.data )
+      for( var j = chart.data.datasets.length - 1; j >= 0; j-- ){
+        if(  chart.data.datasets[j].label == stockID){
+          chart.data.datasets.splice( j, 1 );
+        }
+      }
+      console.log( chart.data )
+      console.log('works')
       chart.update();
+      updateLegend( chart );
     }
+    
+    var toString = (date, format) => {
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`
+    }
+    var parse = (dateString, format) => {
+        const parts = dateString.split('-');
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1] - 1, 10);
+        const year = parseInt(parts[1], 10);
+        return new Date(year, month, day);
+    }
+    var pickerStart = new Pikaday({ field: document.getElementById('datePickerStart'), format: 'YYYY-M-D', toString, parse})
+    var pickerEnd = new Pikaday({ field: document.getElementById('datePickerEnd'), format: 'YYYY-M-D', toString, parse})
+    pickerStart.setDate( startDate )
+    pickerEnd.setDate( endDate )
 
-    var picker = new Pikaday({ field: document.getElementById('datePickerStart')})
-    var picker = new Pikaday({ field: document.getElementById('datePickerEnd')})
+    var ws = new WebSocket('ws://localhost:8080');
+    ws.onmessage = function (event) {
+      // update         
+    };

@@ -4,10 +4,22 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+var demiacleWebSocket = require('./server/demiacleWebSocket.server.js');
+var localStorage = require('node-localstorage').LocalStorage;
 var index = require('./routes/index');
 
 var app = express();
+
+// Load local storage
+localStorage = new localStorage('localStorage')
+if( localStorage.getItem('trackingStock') === null ){
+  localStorage.setItem('trackingStock', 'test')// TODO SET DEFAULTS
+}
+// Middleware to pass local storage to router
+function passLocalStorage( req, res, next) {
+  res.locals.localStorage = localStorage.getItem("trackingStock");
+  next(); 
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.use('/', passLocalStorage, index );
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -41,8 +53,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen( 8080, function() {
+const server = app.listen( 8080, function() {
   console.log('Listening on port 8080')
-})
+});
+
+demiacleWebSocket( server, localStorage )
 
 module.exports = app;

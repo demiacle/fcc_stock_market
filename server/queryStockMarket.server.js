@@ -11,7 +11,7 @@ function queryStockMarket( query, from, to ){
 
 function queryDefaultStockMarket(){
     var random = ['NASDAQ:FB', 'NASDAQ:AAPL', 'NASDAQ:AMZN', 'NYSE:TWTR'].reduce( (accumulator, i) => {
-        if (Math.random() < 0.4)
+        if (Math.random() < 0.4 || true)
             accumulator.push(i);
         return accumulator;
     }, [])
@@ -34,7 +34,7 @@ function getStocks( resuest ){
 
             var parsedQuotes = [];
             for (let key of Object.keys(quotes)) {
-                parsedQuotes.push({ stock: key, dataset: quotes[key] })
+                parsedQuotes.push({ stock: key.replace( /NASDAQ\:|NYSE\:/, ''), dataset: quotes[key] })
             }
 
             resolve(parsedQuotes)
