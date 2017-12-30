@@ -208,13 +208,13 @@ block content
       var response = JSON.parse( event.data )
       console.log( response )
       if( response.type == 'remove' ){
-        removeDataFromChart( response.stockID );
+        removeDataFromChart( response.message );
       }
       if( response.type == 'add' ){
-        addDataToChart( response.data )
+        addDataToChart( response.message )
       }
       if ( response.type == 'fail') {
         // TODO place into a nice html element
-        alert( response.messege )
+        alert( response.message )
       }
     };

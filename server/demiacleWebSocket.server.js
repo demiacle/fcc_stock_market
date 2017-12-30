@@ -1,6 +1,6 @@
 var WebSocket = require('ws');
 var queryStockMarket = require('./queryStockMarket.server.js')
-
+//TODO implement ping
 function demiacleWebSocket( server, localStorage ) {
     const wss = new WebSocket.Server({ server })
     wss.on('connection', (ws) => {
@@ -8,10 +8,10 @@ function demiacleWebSocket( server, localStorage ) {
         ws.on('message', (data) => {
             var request = JSON.parse(data)
             if (request.type == 'remove') {
-                removeStock( localStorage, request.stockID.toUpperCase(), ws )
+                removeStock( localStorage, request.stockID.toUpperCase(), wss, ws )
             }
             if (request.type == 'add') {
-                addStock( localStorage, request.stockID.toUpperCase(), ws )
+                addStock( localStorage, request.stockID.toUpperCase(), wss, ws )
             }
         })
         ws.on('close', () => { 'Client disconnected' })
@@ -19,39 +19,55 @@ function demiacleWebSocket( server, localStorage ) {
     })
 }
 
-function removeStock( localStorage, stockID, ws ){
+function removeStock( localStorage, stockID, wss, ws ){
     console.log('removing :' + stockID) 
     var trackingStock = JSON.parse(localStorage.getItem('trackingStock'))
     if( trackingStock.stocks.length < 2 ) {
-        ws.send(JSON.stringify( { type: 'fail', messege: `At least one stock must be tracked at all times!` } ) )
+        sendError( ws, 'At least one stock must be tracked at all times!' )
         return;
     }
     for (var i = trackingStock.stocks.length - 1; i >= 0; i--) {
         if (trackingStock.stocks[i].includes(stockID)) {
             trackingStock.stocks.splice(i, 1)
             localStorage.setItem('trackingStock', JSON.stringify(trackingStock))
-            ws.send(JSON.stringify({ type: 'remove', stockID: stockID }))
+            broadcast( wss.clients,'remove', stockID )
             break;
         }
     }
 }
 
-async function addStock( localStorage, stockID, ws ){
-    console.log('adding :' + stockID)
+async function addStock( localStorage, stockID, wss, ws ){
     var trackingStock = JSON.parse(localStorage.getItem('trackingStock'))
     if( trackingStock.stocks.length > 9 ){
-        ws.send( JSON.stringify({ type: 'fail', messege: 'A maximum of 10 stocks may be tracked at a time' } ) )
+        sendError( ws, 'A maximum of 10 stocks may be tracked at a time' )
         return;
     }
+    if( trackingStock.stocks.includes( stockID ) ){
+        sendError( ws, `${stockID} is already being tracked`)
+        return;
+    }
+    console.log('adding :' + stockID)
 
     var stockFound = await queryStockMarket( [stockID], trackingStock.startDate, trackingStock.endDate );
     if( stockFound[0].dataset.length > 0 ){
         trackingStock.stocks.push(stockID)
         localStorage.setItem('trackingStock', JSON.stringify(trackingStock))
-        ws.send(JSON.stringify({ type: 'add', data: stockFound[0] }))
+        broadcast( wss.clients, 'add', stockFound[0] )
     } else {
-        ws.send(JSON.stringify( { type: 'fail', messege: `Stock ${stockID} not found or doesn't exist` } ) )
+        sendError( ws, `Stock ${stockID} not found or doesn't exist` )
     }
+}
+
+function broadcast( clients, type, message ){
+    clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: type, message: message }))
+        }
+    })
+}
+
+function sendError( ws, message ){
+    ws.send(JSON.stringify( { type: 'fail', message: message } ) )
 }
 
 module.exports = demiacleWebSocket;
