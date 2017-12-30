@@ -1,17 +1,26 @@
 var WebSocket = require('ws');
 var queryStockMarket = require('./queryStockMarket.server.js')
+
 //TODO implement ping
 function demiacleWebSocket( server, localStorage ) {
     const wss = new WebSocket.Server({ server })
     wss.on('connection', (ws) => {
+        var isLocked = false;
         console.log('Client connected')
-        ws.on('message', (data) => {
+        ws.on('message', async (data) => {
+            if( isLocked ){
+                sendError( ws, 'busy' );
+                return;
+            } 
+            isLocked = true;
             var request = JSON.parse(data)
             if (request.type == 'remove') {
                 removeStock( localStorage, request.stockID.toUpperCase(), wss, ws )
+                isLocked = false;
             }
             if (request.type == 'add') {
-                addStock( localStorage, request.stockID.toUpperCase(), wss, ws )
+                await addStock( localStorage, request.stockID.toUpperCase(), wss, ws )
+                isLocked = false;
             }
         })
         ws.on('close', () => { 'Client disconnected' })
@@ -47,7 +56,6 @@ async function addStock( localStorage, stockID, wss, ws ){
         return;
     }
     console.log('adding :' + stockID)
-
     var stockFound = await queryStockMarket( [stockID], trackingStock.startDate, trackingStock.endDate );
     if( stockFound[0].dataset.length > 0 ){
         trackingStock.stocks.push(stockID)

@@ -11,7 +11,6 @@ block content
     | To
     input( type="text" id="datePickerEnd")
   canvas#mainChart
-  // TODO change legend to html and place a button to remove from display and a button to remove dataset
   div#legend
   
   div#addStockContainer
@@ -32,9 +31,13 @@ block content
   
 
   // *****SCRIPTS*****
-  script(src="/javascripts/initializeChart.js")
-  script(src="")
   script.
+    var stocks = JSON.parse('!{stocks}') // Render pug variable TODO remove from global
+  script(src="/javascripts/initializeChart.js")
+  script(src="/javascripts/datePickerLogic.js")
+  script(src="/javascripts/websocketLogic.js")
+  script.
+    /*
     Chart.defaults.LineWithLine = Chart.defaults.line;
     Chart.controllers.LineWithLine = Chart.controllers.line.extend({
       draw: function(ease) {
@@ -218,3 +221,4 @@ block content
         alert( response.message )
       }
     };
+    */
