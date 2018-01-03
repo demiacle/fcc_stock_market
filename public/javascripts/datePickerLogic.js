@@ -21,6 +21,7 @@ function changeDateStart () {
     console.log( `${newDate.getFullYear()}-${newDate.getDate()}-${newDate.getMonth()+1}` )
     requestDateStart( `${newDate.getFullYear()}-${newDate.getDate()}-${newDate.getMonth()+1}` );
 }
+// TODO BUG IS STUCK IN LOOP reset is causing picker to pick which is causing another request
 function changeDateEnd () {
     if( !this.hasLoaded ){
         this.hasLoaded = true;
@@ -30,6 +31,7 @@ function changeDateEnd () {
     console.log( `${newDate.getFullYear()}-${newDate.getDate()}-${newDate.getMonth()+1}` )
     requestDateEnd( `${newDate.getFullYear()}-${newDate.getDate()}-${newDate.getMonth()+1}` );
 }
+
 var pickerStart = new Pikaday({ 
     field: document.getElementById('datePickerStart'),
     format: 'YYYY-M-D',
@@ -44,5 +46,5 @@ var pickerEnd = new Pikaday({
     parse,
     onSelect: changeDateEnd
  })
-pickerStart.setDate(startDate)
-pickerEnd.setDate(endDate)
+//pickerStart.setDate(startDate)
+//pickerEnd.setDate(endDate)

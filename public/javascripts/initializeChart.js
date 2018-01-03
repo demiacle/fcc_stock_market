@@ -25,41 +25,36 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
 });
 
 // TODO REMOVE ALL THESE GLOBALS
-// '!{variable}' renders a pug unescaped string
-//var stocks = JSON.parse('!{stocks}')
-var xAxis = stocks[0].dataset.map(i => {
-    return i.date.substring(0, 10);
-});
-var niceColors = [
-    'rgb(130, 50, 60)',
-    'rgb(0, 99, 132)',
-    'rgb(100, 200, 100)',
-    'rgb(230, 230, 0)',
-    'rgb( 0, 150, 230)',
-    'rgb(255, 199, 132)',
-    'rgb(230, 0, 232)',
-    'rgb(140, 250, 150)',
-    'rgb(50, 250, 250)',
-    'rgb(250, 0, 0)'
-];
-var startDate = xAxis[0];
-var endDate = xAxis[xAxis.length - 1];
-
-var datasets = stocks.map(buildNewDataset);
-console.log(datasets)
 function buildNewDataset(data) {
-    var color = getNewColor();
-    return {
-        label: data.stock,
-        lineTension: 0,
-        borderWidth: 1,
-        pointRadius: 0,
-        pointStyle: 'rectRot',
-        backgroundColor: color,
-        borderColor: color,
-        data: data.dataset.map(i => { return i.close }),
-        fill: false
-    }
+    return data.map( item =>{
+        var color = getNewColor();
+        return {
+            label: item.stock,
+            lineTension: 0,
+            borderWidth: 1,
+            pointRadius: 0,
+            pointStyle: 'rectRot',
+            backgroundColor: color,
+            borderColor: color,
+            data: item.dataset.map(i => { return i.close }),
+            fill: false
+        }
+    })
+}
+var niceColors = [];
+function resetColors(){
+    niceColors =  [
+        'rgb(130, 50, 60)',
+        'rgb(0, 99, 132)',
+        'rgb(100, 200, 100)',
+        'rgb(230, 230, 0)',
+        'rgb( 0, 150, 230)',
+        'rgb(255, 199, 132)',
+        'rgb(230, 0, 232)',
+        'rgb(140, 250, 150)',
+        'rgb(50, 250, 250)',
+        'rgb(250, 0, 0)'
+    ]
 }
 function getNewColor() {
     return niceColors.pop();
@@ -68,13 +63,17 @@ function releaseColor(color) {
     niceColors.push(color);
 }
 var chart;
-function initializeChart(data) {
+function initializeChart( stocks ) {
     var ctx = document.getElementById('mainChart').getContext('2d');
+    var xAxis = stocks[0].dataset.map(i => {
+        return i.date.substring(0, 10);
+    });
+    resetColors();
     chart = new Chart(ctx, {
         type: 'LineWithLine',
         data: {
-            labels: xAxis, // x axis
-            datasets: datasets
+            labels: xAxis,
+            datasets: buildNewDataset( stocks )
         },
 
         // Configuration options go here
@@ -102,13 +101,15 @@ function initializeChart(data) {
         }
     });
 
+    var startDate = xAxis[0];
+    var endDate = xAxis[xAxis.length - 1];
+    pickerStart.setDate(startDate)
+    pickerEnd.setDate(endDate)
     updateLegend(chart)
 }
-
 function updateLegend(chart) {
     document.getElementById('legend').innerHTML = chart.generateLegend();
 }
-
 function buildCustomLegend(chart) {
     var html = '';
     chart.legend.legendItems.forEach(i => {
@@ -119,14 +120,15 @@ function buildCustomLegend(chart) {
 
     return html;
 }
-initializeChart();
+// from pug:
+// var stocks = JSON.parse('!{stocks}')
+initializeChart(stocks);
 
 function addDataToChart(data) {
     chart.data.datasets.push(buildNewDataset(data, chart.data.datasets.length))
     chart.update();
     updateLegend(chart)
 }
-
 function removeDataFromChart(stockID) {
     for (var j = chart.data.datasets.length - 1; j >= 0; j--) {
         if (chart.data.datasets[j].label == stockID) {
@@ -137,22 +139,16 @@ function removeDataFromChart(stockID) {
     chart.update();
     updateLegend(chart);
 }
-
 document.getElementById('nasdaqForm').addEventListener('submit', event => {
     event.preventDefault();
     requestAddStock(document.getElementById('nasdaqQuery').value)
 });
-
 function lockSubmit() {
     document.getElementById('submit').disabled = true;
 }
 function unlockSubmit() {
     document.getElementById('submit').disabled = false;
 }
-function zoomChart(){
-    console.log(chart)
-}
-
 document.getElementById('mainChart').onclick = function(evt){
     var activePoints = chart.getElementsAtEvent(evt);
     console.log(activePoints)

@@ -31,7 +31,9 @@ block content
 
   // *****SCRIPTS*****
   script.
-    var stocks = JSON.parse('!{stocks}') // Render pug variable TODO remove from global
-  script(src="/javascripts/initializeChart.js")
+    // '!{variable}' renders a pug unescaped string
+    // Render pug variable TODO remove from global
+    var stocks = JSON.parse('!{stocks}')
   script(src="/javascripts/datePickerLogic.js")
+  script(src="/javascripts/initializeChart.js")
   script(src="/javascripts/websocketLogic.js")

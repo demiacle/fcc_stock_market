@@ -3,7 +3,7 @@ var googleFinance = require('google-finance')
 function queryStockMarket( query, from, to ){
     request = {
         symbols: query,
-        from: from,//TODO calculate year from to
+        from: from,
         to: to
     }
     return getStocks( request );
@@ -28,7 +28,7 @@ function getStocks( request ){
     })
 }
 
-// Reduce the amount of data per chart to 399 entries to allow huge time spans
+// Reduce the amount of data per chart to between 150 and 300 entries to allow huge time spans
 function pruneData( filteredData, item, index, quotes ){
     var pruneRatio = Math.max( 1, Math.floor( quotes.length / 150 ) )
     if( index % pruneRatio == 0 ) {

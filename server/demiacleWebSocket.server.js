@@ -26,7 +26,11 @@ function demiacleWebSocket( server, localStorage ) {
                 await addStock( localStorage, request.stockID.toUpperCase(), wss, ws )
                 isLocked = false;
             }
-            if (request.type== 'endDate') {
+            if (request.type == 'endDate') {
+                await updateDateAndBroadcast( wss, ws, localStorage, request.type, request.date );
+                isLocked = false;
+            }
+            if (request.type == 'startDate') {
                 await updateDateAndBroadcast( wss, ws, localStorage, request.type, request.date );
                 isLocked = false;
             }
