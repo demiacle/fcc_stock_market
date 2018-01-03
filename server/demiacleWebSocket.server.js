@@ -4,12 +4,17 @@ var queryStockMarket = require('./queryStockMarket.server.js')
 //TODO implement ping
 function demiacleWebSocket( server, localStorage ) {
     const wss = new WebSocket.Server({ server })
+    // Only allow one add/remove request at a time
+    var isLocked = false;
     wss.on('connection', (ws) => {
-        var isLocked = false;
         console.log('Client connected')
+        ws.isAlive = true; 
+        ws.on('pong', () => {
+            ws.isAlive = true;
+        })
         ws.on('message', async (data) => {
             if( isLocked ){
-                sendError( ws, 'busy' );
+                sendError( ws, 'Sever busy, try again' );
                 return;
             } 
             isLocked = true;
@@ -26,6 +31,19 @@ function demiacleWebSocket( server, localStorage ) {
         ws.on('close', () => { 'Client disconnected' })
         ws.on('error', () => { console.log('error, disconnecting') })
     })
+
+    // Check connection every 30 seconds
+    const pingpong = setInterval( function() {
+        wss.clients.forEach( ws => {
+            if( ws.isAlive === false ){
+                console.log( 'terminating lost websocket connection')
+                return ws.terminate();
+            }
+
+            ws.isAlive = false;
+            ws.ping('', false, true )
+        })
+    }, 30000 )
 }
 
 function removeStock( localStorage, stockID, wss, ws ){
