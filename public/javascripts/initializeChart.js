@@ -17,7 +17,7 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
             ctx.moveTo(x, topY);
             ctx.lineTo(x, bottomY);
             ctx.lineWidth = 1;
-            ctx.strokeStyle = '#07C';
+            ctx.strokeStyle = '#BDF';
             ctx.stroke();
             ctx.restore();
         }
@@ -54,6 +54,7 @@ function buildNewDataset(data) {
         lineTension: 0,
         borderWidth: 1,
         pointRadius: 0,
+        pointStyle: 'rectRot',
         backgroundColor: color,
         borderColor: color,
         data: data.dataset.map(i => { return i.close }),
@@ -87,6 +88,10 @@ function initializeChart(data) {
                 intersect: false,
                 mode: 'index'
             },
+            hover: {
+                intersect: false,
+                mode: 'index'
+            },
             scales: {
                 yAxes: [{
                     ticks: {
@@ -114,15 +119,14 @@ function buildCustomLegend(chart) {
 
     return html;
 }
-
 initializeChart();
 
 function addDataToChart(data) {
-    // TODO stop from adding duplicates might be unessecary if 
     chart.data.datasets.push(buildNewDataset(data, chart.data.datasets.length))
     chart.update();
     updateLegend(chart)
 }
+
 function removeDataFromChart(stockID) {
     for (var j = chart.data.datasets.length - 1; j >= 0; j--) {
         if (chart.data.datasets[j].label == stockID) {
@@ -138,16 +142,19 @@ document.getElementById('nasdaqForm').addEventListener('submit', event => {
     event.preventDefault();
     requestAddStock(document.getElementById('nasdaqQuery').value)
 });
-function requestAddStock(stockID) {
-    console.log(stockID)
-    ws.send(JSON.stringify({
-        type: 'add',
-        stockID: stockID
-    }));
+
+function lockSubmit() {
+    document.getElementById('submit').disabled = true;
 }
-function requestRemoveStock(stockID) {
-    ws.send(JSON.stringify({
-        type: 'remove',
-        stockID: stockID
-    }));
+function unlockSubmit() {
+    document.getElementById('submit').disabled = false;
 }
+function zoomChart(){
+    console.log(chart)
+}
+
+document.getElementById('mainChart').onclick = function(evt){
+    var activePoints = chart.getElementsAtEvent(evt);
+    console.log(activePoints)
+    // => activePoints is an array of points on the canvas that are at the same position as the click event.
+};

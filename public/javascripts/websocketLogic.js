@@ -1,6 +1,5 @@
 var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
 ws.onmessage = function (event) {
-    // TODO implement lock submit button to stop multiple requests cleanly
     var response = JSON.parse(event.data)
     console.log(response)
     if (response.type == 'remove') {
@@ -10,10 +9,41 @@ ws.onmessage = function (event) {
         addDataToChart(response.message)
     }
     if (response.type == 'fail') {
-        // TODO place into a nice html element
         alert(response.message)
     }
+    if (response.type == 'reset') {
+        alert('reset')
+    }
+    unlockSubmit();
 };
 ws.onclose = function (event ){
     alert( 'You have lost the connection to the server, please reload' )
+    lockSubmit();
 };
+function requestAddStock(stockID) {
+    console.log(stockID)
+    ws.send(JSON.stringify({
+        type: 'add',
+        stockID: stockID
+    }));
+    lockSubmit();
+}
+function requestRemoveStock(stockID) {
+    ws.send(JSON.stringify({
+        type: 'remove',
+        stockID: stockID
+    }));
+    lockSubmit();
+}
+function requestDateEnd (date){
+    ws.send(JSON.stringify({
+        type: 'endDate',
+        date
+    }));
+}
+function requestDateStart (date){
+    ws.send(JSON.stringify({
+        type: 'startDate',
+        date
+    }));
+}

@@ -1,7 +1,6 @@
 var WebSocket = require('ws');
 var queryStockMarket = require('./queryStockMarket.server.js')
 
-//TODO implement ping
 function demiacleWebSocket( server, localStorage ) {
     const wss = new WebSocket.Server({ server })
     // Only allow one add/remove request at a time
@@ -27,6 +26,10 @@ function demiacleWebSocket( server, localStorage ) {
                 await addStock( localStorage, request.stockID.toUpperCase(), wss, ws )
                 isLocked = false;
             }
+            if (request.type== 'endDate') {
+                await updateDateAndBroadcast( wss, ws, localStorage, request.type, request.date );
+                isLocked = false;
+            }
         })
         ws.on('close', () => { 'Client disconnected' })
         ws.on('error', () => { console.log('error, disconnecting') })
@@ -44,6 +47,17 @@ function demiacleWebSocket( server, localStorage ) {
             ws.ping('', false, true )
         })
     }, 30000 )
+}
+
+async function updateDateAndBroadcast( wss, ws, localStorage, dateType, date ){
+    console.log(`updating ${dateType}: ${date}` )
+    var trackingStock = JSON.parse(localStorage.getItem('trackingStock'))
+    var startingYear = parseInt( trackingStock.startDate.split('-')[0] )
+    var endingYear = parseInt( trackingStock.endDate.split('-')[0] )
+    trackingStock[ dateType ] = date;
+    localStorage.setItem('trackingStock', JSON.stringify( trackingStock ) )
+    var stocksFound = await queryStockMarket(trackingStock.stocks, trackingStock.startDate, trackingStock.endDate);
+    broadcast(wss.clients, 'reset', stocksFound)
 }
 
 function removeStock( localStorage, stockID, wss, ws ){
