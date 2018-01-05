@@ -17,12 +17,16 @@ function getStocks( request ){
 
             var parsedQuotes = [];
             var pruneRatio = Math.max( 1, 200 / quotes.length );
-            var count = 0;
             for (let key of Object.keys(quotes)) {
+                // trim the datasets if they are huge
                 var filteredData = quotes[key].reduce( pruneData, [] );
-                parsedQuotes.push({ stock: key.replace(/NASDAQ\:|NYSE\:/, ''), dataset: filteredData })
+                // parse
+                var responseObject = {
+                    stock: key.replace(/NASDAQ\:|NYSE\:/, ''),
+                    dataset: filteredData 
+                }
+                parsedQuotes.push( responseObject )
             }
-
             resolve(parsedQuotes)
         })
     })

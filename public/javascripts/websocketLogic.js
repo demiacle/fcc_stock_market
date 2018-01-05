@@ -12,8 +12,7 @@ ws.onmessage = function (event) {
         alert(response.message)
     }
     if (response.type == 'reset') {
-        alert('reset')
-        initializeChart( response.message )
+        resizeChart( response.message );
     }
     unlockSubmit();
 };

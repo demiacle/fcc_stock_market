@@ -4,10 +4,11 @@ block content
   div#titleContainer
     h1 
       | Live stock tracker
+  p.faded
+    | YYYY MM DD&nbsp;&nbsp;-&nbsp;&nbsp;YYYY MM DD
   div#datePickerContainer
-    | From
     input( type="text" id="datePickerStart")
-    | To
+    | -
     input( type="text" id="datePickerEnd")
   canvas#mainChart
   div#legend
@@ -34,6 +35,8 @@ block content
     // '!{variable}' renders a pug unescaped string
     // Render pug variable TODO remove from global
     var stocks = JSON.parse('!{stocks}')
+    var startDate = '!{startDate}'
+    var endDate = '!{endDate}'
   script(src="/javascripts/datePickerLogic.js")
   script(src="/javascripts/initializeChart.js")
   script(src="/javascripts/websocketLogic.js")

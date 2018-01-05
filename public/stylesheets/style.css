@@ -11,6 +11,13 @@ h1, p, div, input {
 a {
   color: #00B7FF;
 }
+p.faded {
+  color: #afccdf;
+  text-align: center;
+  font-size: small;
+  margin: 0;
+  margin-top: -15px;
+}
 #footer {
   text-align: center;
   margin-top: 80px;
@@ -39,6 +46,12 @@ a {
   width: 70px;
   margin-left: 7px;
   margin-right: 7px;
+}
+#datePickerStart::after {
+    content: 'YYYY-MM-DD';
+    position: relative;
+    top: -20px;
+    color: red;
 }
 #addStockContainer div {
   display: inline-block;

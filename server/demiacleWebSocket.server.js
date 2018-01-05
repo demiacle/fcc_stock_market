@@ -1,8 +1,9 @@
 var WebSocket = require('ws');
 var queryStockMarket = require('./queryStockMarket.server.js')
+var wss;
 
 function demiacleWebSocket( server, localStorage ) {
-    const wss = new WebSocket.Server({ server })
+    wss = new WebSocket.Server({ server })
     // Only allow one add/remove request at a time
     var isLocked = false;
     wss.on('connection', (ws) => {
@@ -26,11 +27,11 @@ function demiacleWebSocket( server, localStorage ) {
                 await addStock( localStorage, request.stockID.toUpperCase(), wss, ws )
                 isLocked = false;
             }
-            if (request.type == 'endDate') {
+            if (request.type == 'endDate' && isValid( request.date ) ) {
                 await updateDateAndBroadcast( wss, ws, localStorage, request.type, request.date );
                 isLocked = false;
             }
-            if (request.type == 'startDate') {
+            if (request.type == 'startDate' && isValid( request.date )) {
                 await updateDateAndBroadcast( wss, ws, localStorage, request.type, request.date );
                 isLocked = false;
             }
@@ -53,15 +54,28 @@ function demiacleWebSocket( server, localStorage ) {
     }, 30000 )
 }
 
+function isValid( date ){
+    if( date.length == 10 && date.match( /\d{4}-\d{2}-\d{2}/ ).length == 1 ) {
+        return true
+    } else {
+        sendError( ws, 'Incorrect date format' );
+        return false
+    }
+}
+
 async function updateDateAndBroadcast( wss, ws, localStorage, dateType, date ){
     console.log(`updating ${dateType}: ${date}` )
     var trackingStock = JSON.parse(localStorage.getItem('trackingStock'))
     var startingYear = parseInt( trackingStock.startDate.split('-')[0] )
     var endingYear = parseInt( trackingStock.endDate.split('-')[0] )
+    if( startingYear - endingYear > 0 ) {
+        sendError( ws, 'Starting date must be earlier than ending date' );
+        return;
+    }
     trackingStock[ dateType ] = date;
     localStorage.setItem('trackingStock', JSON.stringify( trackingStock ) )
     var stocksFound = await queryStockMarket(trackingStock.stocks, trackingStock.startDate, trackingStock.endDate);
-    broadcast(wss.clients, 'reset', stocksFound)
+    broadcast(wss.clients, 'reset', { stocksFound, startDate: trackingStock.startDate, endDate: trackingStock.endDate } )
 }
 
 function removeStock( localStorage, stockID, wss, ws ){

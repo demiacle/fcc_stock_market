@@ -26,7 +26,13 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
 
 // TODO REMOVE ALL THESE GLOBALS
 function buildNewDataset(data) {
-    return data.map( item =>{
+    if( data.length ){
+        return data.map( parseData );
+    } else {
+        return parseData( data )
+    }
+
+    function parseData( item ){
         var color = getNewColor();
         return {
             label: item.stock,
@@ -39,7 +45,7 @@ function buildNewDataset(data) {
             data: item.dataset.map(i => { return i.close }),
             fill: false
         }
-    })
+    }
 }
 var niceColors = [];
 function resetColors(){
@@ -62,20 +68,36 @@ function getNewColor() {
 function releaseColor(color) {
     niceColors.push(color);
 }
-var chart;
+function createXAxis( startDate, endDate ){
+    // calculate every day between start and end
+    var startDate = startDate.split('-');
+    startDate[1]--;
+    var endDate = endDate.split('-');
+    endDate[1]--;
+
+    startDate = new Date( ...startDate );
+    endDate = new Date( ...endDate );
+    var datesBetweenStartEnd = [];
+    while( startDate < endDate ){
+        datesBetweenStartEnd.push( toString( startDate ) );
+        var test = startDate.getDate();
+        startDate.setDate( startDate.getDate() + 1 )
+    }
+    return datesBetweenStartEnd;
+}
+var stockChart;
 function initializeChart( stocks ) {
+    if( stockChart ){
+        stockChart.destroy();
+    }
     var ctx = document.getElementById('mainChart').getContext('2d');
-    var xAxis = stocks[0].dataset.map(i => {
-        return i.date.substring(0, 10);
-    });
     resetColors();
-    chart = new Chart(ctx, {
+    stockChart = new Chart(ctx, {
         type: 'LineWithLine',
         data: {
-            labels: xAxis,
+            labels: createXAxis( startDate, endDate ),
             datasets: buildNewDataset( stocks )
         },
-
         // Configuration options go here
         options: {
             legendCallback: buildCustomLegend,
@@ -101,14 +123,30 @@ function initializeChart( stocks ) {
         }
     });
 
-    var startDate = xAxis[0];
-    var endDate = xAxis[xAxis.length - 1];
-    pickerStart.setDate(startDate)
-    pickerEnd.setDate(endDate)
-    updateLegend(chart)
+    var count = 0;
+    setPickerDate(startDate, endDate);
+    updateLegend(stockChart)
+    stockChart.update();
+}
+function setPickerDate( start, end ){
+    function fixMonth( date ) {
+        date = date.split("-");
+        date[1] = parseInt(date[1]) - 1; 
+        return new Date( ...date );
+    }
+
+    pickerStart.setDate( fixMonth( start ), true )
+    pickerEnd.setDate( fixMonth( end ), true )
 }
 function updateLegend(chart) {
     document.getElementById('legend').innerHTML = chart.generateLegend();
+}
+function resizeChart( newData ) {
+    resetColors();
+    stockChart.data.labels = createXAxis( newData.startDate, newData.endDate );
+    stockChart.data.datasets = buildNewDataset( newData.stocksFound );
+    setPickerDate( newData.startDate, newData.endDate);
+    stockChart.update();
 }
 function buildCustomLegend(chart) {
     var html = '';
@@ -125,19 +163,19 @@ function buildCustomLegend(chart) {
 initializeChart(stocks);
 
 function addDataToChart(data) {
-    chart.data.datasets.push(buildNewDataset(data, chart.data.datasets.length))
-    chart.update();
-    updateLegend(chart)
+    stockChart.data.datasets.push(buildNewDataset(data))
+    stockChart.update();
+    updateLegend(stockChart)
 }
 function removeDataFromChart(stockID) {
-    for (var j = chart.data.datasets.length - 1; j >= 0; j--) {
-        if (chart.data.datasets[j].label == stockID) {
-            releaseColor(chart.data.datasets[j].backgroundColor)
-            chart.data.datasets.splice(j, 1);
+    for (var j = stockChart.data.datasets.length - 1; j >= 0; j--) {
+        if (stockChart.data.datasets[j].label == stockID) {
+            releaseColor(stockChart.data.datasets[j].backgroundColor)
+            stockChart.data.datasets.splice(j, 1);
         }
     }
-    chart.update();
-    updateLegend(chart);
+    stockChart.update();
+    updateLegend(stockChart);
 }
 document.getElementById('nasdaqForm').addEventListener('submit', event => {
     event.preventDefault();
@@ -150,7 +188,7 @@ function unlockSubmit() {
     document.getElementById('submit').disabled = false;
 }
 document.getElementById('mainChart').onclick = function(evt){
-    var activePoints = chart.getElementsAtEvent(evt);
+    var activePoints = stockChart.getElementsAtEvent(evt);
     console.log(activePoints)
     // => activePoints is an array of points on the canvas that are at the same position as the click event.
 };

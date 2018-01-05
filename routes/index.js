@@ -9,7 +9,7 @@ router.get('/', async function(req, res, next) {
   var trackingStocks = res.locals.localStorage
   var results = await queryStockMarket( trackingStocks.stocks, trackingStocks.startDate, trackingStocks.endDate );
   console.log( results )
-  res.render('index', { stocks: JSON.stringify( results ) } );
+  res.render('index', { stocks: JSON.stringify( results ), startDate: trackingStocks.startDate, endDate: trackingStocks.endDate} );
 });
 
 module.exports = router;
