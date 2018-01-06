@@ -23,7 +23,7 @@ block content
 
   p#footer
     | *built by 
-    a(href="https://twitter.com/Demiacle") Daniel Escobedo
+    a(href="https://twitter.com/Demiacle") Daniel Escobedo:@Demiacle
     |  using 
     a(href="https://www.npmjs.com/package/google-finance") google-finance 
     | and 
@@ -32,11 +32,21 @@ block content
 
   // *****SCRIPTS*****
   script.
+    var demiacleVars = {
+      stocks: JSON.parse('!{stocks}'),
+      startDate: '!{startDate}',
+      endDate: '!{endDate}'
+    }
+  script( src="bundle.js" )
+  script.
+    
     // '!{variable}' renders a pug unescaped string
     // Render pug variable TODO remove from global
+    /*
     var stocks = JSON.parse('!{stocks}')
     var startDate = '!{startDate}'
     var endDate = '!{endDate}'
-  script(src="/javascripts/datePickerLogic.js")
-  script(src="/javascripts/initializeChart.js")
-  script(src="/javascripts/websocketLogic.js")
+    script(src="/javascripts/datePickerLogic.js")
+    script(src="/javascripts/initializeChart.js")
+    script(src="/javascripts/websocketLogic.js")
+    */

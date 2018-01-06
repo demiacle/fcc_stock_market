@@ -1,3 +1,7 @@
+import websocketLogic from './websocketLogic.js';
+
+console.log( 'loading datePicker')
+// TODO Add pikaday npm dependency
 function toString (date, format) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
@@ -11,6 +15,7 @@ function parse (dateString, format) {
     const year = parseInt(parts[1], 10);
     return new Date(year, month.pad(), day.pad());
 }
+// TODO remove from prototype and make into function
 Number.prototype.pad = function(){
     var number = this;
     var needsZero = 2 - this.toString().length;
@@ -19,19 +24,14 @@ Number.prototype.pad = function(){
     }
     return number
 }
-function changeDateStart () {
-    console.log(this)
+export function changeDateStart () {
     var newDate = this._d;
-    console.log( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` )
-    requestDateStart( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` );
+    websocketLogic.requestDateStart( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` );
 }
-function changeDateEnd ( test, test1, test2 ) {
-    console.log(test)
+export function changeDateEnd ( test, test1, test2 ) {
     var newDate = this._d;
-    console.log( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` )
-    requestDateEnd( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` );
+    websocketLogic.requestDateEnd( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` );
 }
-// SET DATE IS BUSTED
 var pickerStart = new Pikaday({ 
     field: document.getElementById('datePickerStart'),
     format: 'YYYY-MM-DD',
@@ -46,5 +46,13 @@ var pickerEnd = new Pikaday({
     parse,
     onSelect: changeDateEnd
  })
-//pickerStart.setDate(startDate)
-//pickerEnd.setDate(endDate)
+export function setDate( start, end ){
+    function fixMonth( date ) {
+        date = date.split("-");
+        date[1] = parseInt(date[1]) - 1; 
+        return new Date( ...date );
+    }
+
+    pickerStart.setDate( fixMonth( start ), true )
+    pickerEnd.setDate( fixMonth( end ), true )
+}

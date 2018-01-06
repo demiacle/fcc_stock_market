@@ -16,5 +16,11 @@
     "pug": "2.0.0-beta11",
     "serve-favicon": "~2.4.5",
     "ws": "^3.3.3"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "webpack": "^3.10.0"
   }
 }

@@ -1,18 +1,21 @@
-var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
+import * as chart from './initializeChart.js'
+console.log( 'loading ws')
+export default function websocketLogic(){
+    var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
 ws.onmessage = function (event) {
     var response = JSON.parse(event.data)
     console.log(response)
     if (response.type == 'remove') {
-        removeDataFromChart(response.message);
+        chart.removeDataFromChart(response.message);
     }
     if (response.type == 'add') {
-        addDataToChart(response.message)
+        chart.addDataToChart(response.message)
     }
     if (response.type == 'fail') {
         alert(response.message)
     }
     if (response.type == 'reset') {
-        resizeChart( response.message );
+        chart.resizeChart( response.message );
     }
     unlockSubmit();
 };
@@ -47,3 +50,16 @@ function requestDateStart (date){
         date
     }));
 }
+}
+
+// Modify DOM
+function lockSubmit() {
+    document.getElementById('submit').disabled = true;
+}
+function unlockSubmit() {
+    document.getElementById('submit').disabled = false;
+}
+document.getElementById('nasdaqForm').addEventListener('submit', event => {
+    event.preventDefault();
+    requestAddStock(document.getElementById('nasdaqQury').value)
+});
