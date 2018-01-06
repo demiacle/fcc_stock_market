@@ -1,9 +1,32 @@
 const path = require('path');
+const webpack = require('webpack')
 
 module.exports = {
-  entry: './src/javascripts/entry.js',
+  entry: {
+    entry: './src/javascripts/entry.js',
+    vendor: [
+    'chart.js',
+    'pikaday'
+    ]
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'public')
-  }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        // TODO use babel loader after dev
+        loader: 'eslint-loader'
+      }
+    ]
+  },
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+      name:'vendor',
+      minChunks: Infinity
+    })
+  ]
 };

@@ -1,36 +1,35 @@
-import websocketLogic from './websocketLogic.js';
+import * as websocketLogic from './websocketLogic.js';
+var Pikaday = require('pikaday')
 
-console.log( 'loading datePicker')
-// TODO Add pikaday npm dependency
-function toString (date, format) {
+export function toString (date) {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
-    return `${year}-${month.pad()}-${day.pad()}`
+    return `${year}-${pad(month)}-${pad(day)}`
 }
-function parse (dateString, format) {
+function parse (dateString) {
     const parts = dateString.split('-');
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1] - 1, 10);
     const year = parseInt(parts[1], 10);
-    return new Date(year, month.pad(), day.pad());
+    return new Date(year, pad(month), pad(day));
 }
-// TODO remove from prototype and make into function
-Number.prototype.pad = function(){
-    var number = this;
-    var needsZero = 2 - this.toString().length;
+function pad( num ){
+    var needsZero = 2 - num.toString().length;
     if( needsZero ){
-        number = '0' + number;
+        num = '0' + num;
     }
-    return number
+    return num
 }
 export function changeDateStart () {
     var newDate = this._d;
-    websocketLogic.requestDateStart( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` );
+    newDate = `${newDate.getFullYear()}-${pad(newDate.getMonth()+1)}-${pad(newDate.getDate())}`;
+    websocketLogic.requestDateStart( newDate );
 }
-export function changeDateEnd ( test, test1, test2 ) {
+export function changeDateEnd () {
     var newDate = this._d;
-    websocketLogic.requestDateEnd( `${newDate.getFullYear()}-${(newDate.getMonth()+1).pad()}-${newDate.getDate().pad()}` );
+    newDate = `${newDate.getFullYear()}-${pad(newDate.getMonth()+1)}-${pad(newDate.getDate())}`;
+    websocketLogic.requestDateEnd( newDate );
 }
 var pickerStart = new Pikaday({ 
     field: document.getElementById('datePickerStart'),
@@ -46,13 +45,12 @@ var pickerEnd = new Pikaday({
     parse,
     onSelect: changeDateEnd
  })
-export function setDate( start, end ){
+export function setPikadayDate( start, end ){
     function fixMonth( date ) {
         date = date.split("-");
         date[1] = parseInt(date[1]) - 1; 
         return new Date( ...date );
     }
-
     pickerStart.setDate( fixMonth( start ), true )
     pickerEnd.setDate( fixMonth( end ), true )
 }

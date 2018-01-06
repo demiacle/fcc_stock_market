@@ -1,7 +1,6 @@
 import * as datePicker from './datePickerLogic.js'
-
-console.log( 'loading  chart')
-// TODO add chart.js dependency
+import * as ws from './websocketLogic.js'
+var Chart = require('chart.js')
 
 // Implements vertical line on chart hover
 Chart.defaults.LineWithLine = Chart.defaults.line;
@@ -33,10 +32,13 @@ function buildCustomLegend(chart) {
     chart.legend.legendItems.forEach(i => {
         html += `<div class="legendColor" style="background-color:${i.fillStyle};"></div>`;
         html += `<p class="legendText">${i.text}</p>`;
-        html += `<span class="removeStock" onclick="requestRemoveStock('${i.text}')">x</span>`;
+        html += `<span class="removeStock" onclick="requestRemoveStock('${i.text}')">x</span>`; // PROBPLEMMMMMMMMMM
     })
     return html;
 }
+// Forward calls to global to avoid managing event listeners on dynamic html
+window.requestRemoveStock = ws.requestRemoveStock;
+
 function buildNewDataset(data) {
     // Check if array
     if( data.length ){
@@ -62,17 +64,16 @@ function buildNewDataset(data) {
 }
 function createXAxis( startDate, endDate ){
     // calculate every day between start and end
-    var startDate = startDate.split('-');
+    startDate = startDate.split('-');
     startDate[1]--;
-    var endDate = endDate.split('-');
+    endDate = endDate.split('-');
     endDate[1]--;
 
     startDate = new Date( ...startDate );
     endDate = new Date( ...endDate );
     var datesBetweenStartEnd = [];
     while( startDate < endDate ){
-        datesBetweenStartEnd.push( toString( startDate ) );
-        var test = startDate.getDate();
+        datesBetweenStartEnd.push( datePicker.toString( startDate ) );
         startDate.setDate( startDate.getDate() + 1 )
     }
     return datesBetweenStartEnd;
@@ -83,7 +84,7 @@ export function resizeChart( newData ) {
     resetColors();
     stockChart.data.labels = createXAxis( newData.startDate, newData.endDate );
     stockChart.data.datasets = buildNewDataset( newData.stocksFound );
-    datePicker.setDate( newData.startDate, newData.endDate);
+    datePicker.setPikadayDate( newData.startDate, newData.endDate);
     stockChart.update();
 }
 export function addDataToChart(data) {
@@ -129,14 +130,14 @@ function updateLegend(chart) {
     document.getElementById('legend').innerHTML = chart.generateLegend();
 }
 
-// remove global implementation?
 var niceColors = [];
+var stockChart;
 export function initialize(){
     console.log( 'initializing')
     resetColors();
 
     var ctx = document.getElementById('mainChart').getContext('2d');
-    var stockChart = new Chart(ctx, {
+    stockChart = new Chart(ctx, {
         type: 'LineWithLine',
         data: {
             labels: createXAxis(demiacleVars.startDate, demiacleVars.endDate),
@@ -166,7 +167,7 @@ export function initialize(){
         }
     });
 
-    datePicker.setDate(demiacleVars.startDate, demiacleVars.endDate);
+    datePicker.setPikadayDate(demiacleVars.startDate, demiacleVars.endDate);
     updateLegend(stockChart)
     stockChart.update();
 }

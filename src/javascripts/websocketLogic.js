@@ -1,7 +1,6 @@
 import * as chart from './initializeChart.js'
-console.log( 'loading ws')
-export default function websocketLogic(){
-    var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
+
+var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
 ws.onmessage = function (event) {
     var response = JSON.parse(event.data)
     console.log(response)
@@ -19,10 +18,11 @@ ws.onmessage = function (event) {
     }
     unlockSubmit();
 };
-ws.onclose = function (event ){
+ws.onclose = function (){
     alert( 'You have lost the connection to the server, please reload' )
     lockSubmit();
 };
+// Exports
 function requestAddStock(stockID) {
     console.log(stockID)
     ws.send(JSON.stringify({
@@ -31,25 +31,24 @@ function requestAddStock(stockID) {
     }));
     lockSubmit();
 }
-function requestRemoveStock(stockID) {
+export function requestRemoveStock(stockID) {
     ws.send(JSON.stringify({
         type: 'remove',
         stockID: stockID
     }));
     lockSubmit();
 }
-function requestDateEnd (date){
+export function requestDateEnd (date){
     ws.send(JSON.stringify({
         type: 'endDate',
         date
     }));
 }
-function requestDateStart (date){
+export function requestDateStart (date){
     ws.send(JSON.stringify({
         type: 'startDate',
         date
     }));
-}
 }
 
 // Modify DOM
@@ -61,5 +60,5 @@ function unlockSubmit() {
 }
 document.getElementById('nasdaqForm').addEventListener('submit', event => {
     event.preventDefault();
-    requestAddStock(document.getElementById('nasdaqQury').value)
+    requestAddStock(document.getElementById('nasdaqQuery').value)
 });
