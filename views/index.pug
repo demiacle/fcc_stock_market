@@ -4,6 +4,8 @@ block content
   div#titleContainer
     h1 
       | Live stock tracker
+  p.description
+    | Change the dates or stocks to view an updated graph.<br>All updates will be visible by everyone currently on the webiste.
   p.faded
     | YYYY MM DD&nbsp;&nbsp;-&nbsp;&nbsp;YYYY MM DD
   div#datePickerContainer
@@ -35,5 +37,6 @@ block content
       startDate: '!{startDate}',
       endDate: '!{endDate}'
     }
+    console.log( demiacleVars.stocks )
   script( src="vendor.bundle.js" )
   script( src="entry.bundle.js" )

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "starto": "node ./bin/www.js"
   },
   "eslintConfig": {
     "root": true
@@ -13,6 +13,7 @@
     "chart.js": "^2.7.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
+    "dotenv": "^4.0.0",
     "express": "~4.15.5",
     "google-finance": "^0.1.10",
     "morgan": "~1.9.0",

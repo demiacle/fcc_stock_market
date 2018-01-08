@@ -51,7 +51,7 @@ function buildCustomLegend(chart) {
 // Forward calls to global to avoid managing event listeners on dynamic html
 window.requestRemoveStock = __WEBPACK_IMPORTED_MODULE_1__websocketLogic_js__["c" /* requestRemoveStock */];
 
-function buildNewDataset(data) {
+function buildNewDataset(data, labels) {
     // Check if array
     if( data.length ){
         return data.map( parseData );
@@ -61,15 +61,23 @@ function buildNewDataset(data) {
 
     function parseData( item ){
         var color = checkoutColor();
+        var datapoints = item.dataset;
         return {
             label: item.stock,
+            spanGaps: true,
             lineTension: 0,
             borderWidth: 1,
             pointRadius: 0,
             pointStyle: 'rectRot',
             backgroundColor: color,
             borderColor: color,
-            data: item.dataset.map(i => { return i.close }),
+            data: labels.map(i => { 
+                if( datapoints[0] && i == datapoints[0].date.substring( 0, 10) ){
+                    return datapoints.shift().close;
+                } else {
+                    return null
+                }
+            }),
             fill: false
         }
     }
@@ -84,7 +92,7 @@ function createXAxis( startDate, endDate ){
     startDate = new Date( ...startDate );
     endDate = new Date( ...endDate );
     var datesBetweenStartEnd = [];
-    while( startDate < endDate ){
+    while( startDate <= endDate ){
         datesBetweenStartEnd.push( __WEBPACK_IMPORTED_MODULE_0__datePickerLogic_js__["b" /* toString */]( startDate ) );
         startDate.setDate( startDate.getDate() + 1 )
     }
@@ -95,7 +103,7 @@ function createXAxis( startDate, endDate ){
 function resizeChart( newData ) {
     resetColors();
     stockChart.data.labels = createXAxis( newData.startDate, newData.endDate );
-    stockChart.data.datasets = buildNewDataset( newData.stocksFound );
+    stockChart.data.datasets = buildNewDataset( newData.stocksFound, stockChart.data.labels );
     __WEBPACK_IMPORTED_MODULE_0__datePickerLogic_js__["a" /* setPikadayDate */]( newData.startDate, newData.endDate);
     stockChart.update();
 }
@@ -149,11 +157,12 @@ function initialize(){
     resetColors();
 
     var ctx = document.getElementById('mainChart').getContext('2d');
+    var labels = createXAxis(demiacleVars.startDate, demiacleVars.endDate)
     stockChart = new Chart(ctx, {
         type: 'LineWithLine',
         data: {
-            labels: createXAxis(demiacleVars.startDate, demiacleVars.endDate),
-            datasets: buildNewDataset(demiacleVars.stocks, niceColors)
+            labels: labels,
+            datasets: buildNewDataset(demiacleVars.stocks, labels)
         },
         options: {
             legendCallback: buildCustomLegend,

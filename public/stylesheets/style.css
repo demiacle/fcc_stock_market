@@ -16,7 +16,14 @@ p.faded {
   text-align: center;
   font-size: small;
   margin: 0;
-  margin-top: -15px;
+}
+p.description {
+  text-align: center;
+  margin-bottom: 10px;
+  background-color: white;
+  border: 1px solid #e8e8e8;
+  padding: 3px;
+  margin-top: 0px;
 }
 #footer {
   text-align: center;
@@ -28,6 +35,7 @@ p.faded {
 }
 #titleContainer h1, #titleContainer p {
   text-align: center;
+  margin-bottom: 0px;
 }
 #mainChart {
   width: 1000px;
@@ -46,6 +54,7 @@ p.faded {
   width: 70px;
   margin-left: 7px;
   margin-right: 7px;
+  border-radius: 7px;
 }
 #datePickerStart::after {
     content: 'YYYY-MM-DD';

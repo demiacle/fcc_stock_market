@@ -3,7 +3,6 @@
 /**
  * Module dependencies.
  */
-
 var app = require('../app');
 var debug = require('debug')('fcc-stock-market:server');
 var http = require('http');
@@ -28,7 +27,7 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
+app.startWebsocket( server );
 /**
  * Normalize a port into a number, string, or false.
  */

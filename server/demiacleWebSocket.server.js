@@ -66,13 +66,13 @@ function isValid( date ){
 async function updateDateAndBroadcast( wss, ws, localStorage, dateType, date ){
     console.log(`updating ${dateType}: ${date}` )
     var trackingStock = JSON.parse(localStorage.getItem('trackingStock'))
+    trackingStock[ dateType ] = date;
     var startingYear = parseInt( trackingStock.startDate.split('-')[0] )
     var endingYear = parseInt( trackingStock.endDate.split('-')[0] )
     if( startingYear - endingYear > 0 ) {
         sendError( ws, 'Starting date must be earlier than ending date' );
         return;
     }
-    trackingStock[ dateType ] = date;
     localStorage.setItem('trackingStock', JSON.stringify( trackingStock ) )
     var stocksFound = await queryStockMarket(trackingStock.stocks, trackingStock.startDate, trackingStock.endDate);
     broadcast(wss.clients, 'reset', { stocksFound, startDate: trackingStock.startDate, endDate: trackingStock.endDate } )

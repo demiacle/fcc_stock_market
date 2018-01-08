@@ -10,6 +10,9 @@ var index = require('./routes/index');
 
 var app = express();
 
+var dotenv = require('dotenv')
+dotenv.load();
+
 // Load local storage
 localStorage = new localStorage('localStorage')
 if( localStorage.getItem('trackingStock') === null ){
@@ -57,10 +60,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-const server = app.listen( 8080, function() {
-  console.log('Listening on port 8080')
-});
-
-demiacleWebSocket( server, localStorage )
+app.startWebsocket = (server)=>{ demiacleWebSocket(server, localStorage) };
 
 module.exports = app;
