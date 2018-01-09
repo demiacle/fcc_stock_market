@@ -29,9 +29,6 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
     }
 })
 
-// Drastically improve framerate after animation ends
-// Pull request made to chart.js, remove once accepted
-
 function buildCustomLegend(chart) {
     var html = '';
     chart.legend.legendItems.forEach(i => {
@@ -173,11 +170,23 @@ export function initialize() {
             },
             scales: {
                 yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Closing shares'
+                    },
                     ticks: {
                         beginAtZero: true
                     }
                 }],
-                xAxes: [{}]
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    },
+                    ticks: {
+                        maxTicksLimit: 14
+                    }
+                }]
             }
         }
     });

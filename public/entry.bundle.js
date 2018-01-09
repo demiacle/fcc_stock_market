@@ -41,9 +41,6 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
     }
 })
 
-// Drastically improve framerate after animation ends
-// Pull request made to chart.js, remove once accepted
-
 function buildCustomLegend(chart) {
     var html = '';
     chart.legend.legendItems.forEach(i => {
@@ -185,11 +182,23 @@ function initialize() {
             },
             scales: {
                 yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Closing shares'
+                    },
                     ticks: {
                         beginAtZero: true
                     }
                 }],
-                xAxes: [{}]
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    },
+                    ticks: {
+                        maxTicksLimit: 14
+                    }
+                }]
             }
         }
     });
@@ -227,7 +236,7 @@ __WEBPACK_IMPORTED_MODULE_2__initializeChart_js__["b" /* initialize */]();
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__initializeChart_js__ = __webpack_require__(10);
 
 
-var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
+var ws = new WebSocket( 'ws://' + demiacleVars.url );
 ws.onmessage = function (event) {
     var response = JSON.parse(event.data)
     console.log(response)

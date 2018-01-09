@@ -5,7 +5,8 @@ block content
     h1 
       | Live stock tracker
   p.description
-    | Change the dates or stocks to view an updated graph.<br>All updates will be visible by everyone currently on the webiste.
+    | Change the dates or stocks to view an updated graph. All updates will be visible by everyone currently on the webiste.
+    | <br>If a stock is not visible it most likely does not exist within the current date boundaries
   p.faded
     | YYYY MM DD&nbsp;&nbsp;-&nbsp;&nbsp;YYYY MM DD
   div#datePickerContainer
@@ -28,11 +29,15 @@ block content
     a(href="https://twitter.com/Demiacle") Daniel Escobedo:@Demiacle
     |  using 
     a(href="https://www.npmjs.com/package/google-finance") google-finance 
-    | and 
+    | , 
     a(href="https://github.com/dbushell/Pikaday") Pikaday
+    | and 
+    a(href="https://github.com/chartjs/Chart.js") Chart.js
     
   script.
+    // Set pug variables so we can work with them in the scripts
     var demiacleVars = {
+      url: '!{url}',
       stocks: JSON.parse('!{stocks}'),
       startDate: '!{startDate}',
       endDate: '!{endDate}'

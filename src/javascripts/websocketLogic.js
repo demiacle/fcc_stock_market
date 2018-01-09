@@ -1,6 +1,6 @@
 import * as chart from './initializeChart.js'
 
-var ws = new WebSocket('ws://localhost:8080'); // TODO change to pug variable of webiste 
+var ws = new WebSocket( 'ws://' + demiacleVars.url );
 ws.onmessage = function (event) {
     var response = JSON.parse(event.data)
     console.log(response)
