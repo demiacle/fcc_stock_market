@@ -24,7 +24,18 @@ build/Release
 
 # Dependency directory
 # https://docs.npmjs.com/cli/shrinkwrap#caveats
-node_modules
+node_modules/*
+!node_modules/chart.js/
+
+node_modules/chart.js/*
+!node_modules/chart.js/src/
+
+node_modules/chart.js/src/*
+!node_modules/chart.js/src/core
+
+node_modules/chart.js/src/core/*
+!node_modules/chart.js/src/core/core.element.js
+
 
 # Debug log from npm
 npm-debug.log

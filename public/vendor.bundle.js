@@ -8938,8 +8938,11 @@ helpers.extend(Element.prototype, {
 		var start = me._start;
 		var view = me._view;
 
+		// Improve framerate once animations finish
+		// Pull request made, be sure to remove this and untrack once accepted
 		// No animation -> No Transition
-		if (!model || ease === 1) {
+		if (!model || ease === 1 || (me._chart && me._chart.animating === false && me !== me._chart.tooltip)) {
+		//if (!model || ease === 1) {
 			me._view = model;
 			me._start = null;
 			return me;

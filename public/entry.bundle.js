@@ -14,9 +14,10 @@ webpackJsonp([0],{
 
 var Chart = __webpack_require__(11)
 
-// Implements vertical line on chart hover
 Chart.defaults.LineWithLine = Chart.defaults.line;
+
 Chart.controllers.LineWithLine = Chart.controllers.line.extend({
+    // Implements vertical line on chart hover
     draw: function (ease) {
         Chart.controllers.line.prototype.draw.call(this, ease);
 
@@ -38,7 +39,11 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
             ctx.restore();
         }
     }
-});
+})
+
+// Drastically improve framerate after animation ends
+// Pull request made to chart.js, remove once accepted
+
 function buildCustomLegend(chart) {
     var html = '';
     chart.legend.legendItems.forEach(i => {
@@ -53,13 +58,13 @@ window.requestRemoveStock = __WEBPACK_IMPORTED_MODULE_1__websocketLogic_js__["c"
 
 function buildNewDataset(data, labels) {
     // Check if array
-    if( data.length ){
-        return data.map( parseData );
+    if (data.length) {
+        return data.map(parseData);
     } else {
-        return parseData( data )
+        return parseData(data)
     }
 
-    function parseData( item ){
+    function parseData(item) {
         var color = checkoutColor();
         var datapoints = item.dataset;
         return {
@@ -71,8 +76,8 @@ function buildNewDataset(data, labels) {
             pointStyle: 'rectRot',
             backgroundColor: color,
             borderColor: color,
-            data: labels.map(i => { 
-                if( datapoints[0] && i == datapoints[0].date.substring( 0, 10) ){
+            data: labels.map(i => {
+                if (datapoints[0] && i == datapoints[0].date.substring(0, 10)) {
                     return datapoints.shift().close;
                 } else {
                     return null
@@ -82,33 +87,33 @@ function buildNewDataset(data, labels) {
         }
     }
 }
-function createXAxis( startDate, endDate ){
+function createXAxis(startDate, endDate) {
     // calculate every day between start and end
     startDate = startDate.split('-');
     startDate[1]--;
     endDate = endDate.split('-');
     endDate[1]--;
 
-    startDate = new Date( ...startDate );
-    endDate = new Date( ...endDate );
+    startDate = new Date(...startDate);
+    endDate = new Date(...endDate);
     var datesBetweenStartEnd = [];
-    while( startDate <= endDate ){
-        datesBetweenStartEnd.push( __WEBPACK_IMPORTED_MODULE_0__datePickerLogic_js__["b" /* toString */]( startDate ) );
-        startDate.setDate( startDate.getDate() + 1 )
+    while (startDate <= endDate) {
+        datesBetweenStartEnd.push(__WEBPACK_IMPORTED_MODULE_0__datePickerLogic_js__["b" /* toString */](startDate));
+        startDate.setDate(startDate.getDate() + 1)
     }
     return datesBetweenStartEnd;
 }
 
 // Exports
-function resizeChart( newData ) {
+function resizeChart(newData) {
     resetColors();
-    stockChart.data.labels = createXAxis( newData.startDate, newData.endDate );
-    stockChart.data.datasets = buildNewDataset( newData.stocksFound, stockChart.data.labels );
-    __WEBPACK_IMPORTED_MODULE_0__datePickerLogic_js__["a" /* setPikadayDate */]( newData.startDate, newData.endDate);
+    stockChart.data.labels = createXAxis(newData.startDate, newData.endDate);
+    stockChart.data.datasets = buildNewDataset(newData.stocksFound, stockChart.data.labels);
+    __WEBPACK_IMPORTED_MODULE_0__datePickerLogic_js__["a" /* setPikadayDate */](newData.startDate, newData.endDate);
     stockChart.update();
 }
 function addDataToChart(data) {
-    stockChart.data.datasets.push(buildNewDataset(data))
+    stockChart.data.datasets.push(buildNewDataset(data, stockChart.data.labels))
     stockChart.update();
     updateLegend(stockChart)
 }
@@ -124,8 +129,8 @@ function removeDataFromChart(stockID) {
 }
 
 // Colors
-function resetColors(){
-    niceColors =  [
+function resetColors() {
+    niceColors = [
         'rgb(130, 50, 60)',
         'rgb(0, 99, 132)',
         'rgb(100, 200, 100)',
@@ -141,7 +146,7 @@ function resetColors(){
 function releaseColor(color) {
     niceColors.push(color);
 }
-function checkoutColor(){
+function checkoutColor() {
     return niceColors.pop();
 }
 
@@ -152,8 +157,8 @@ function updateLegend(chart) {
 
 var niceColors = [];
 var stockChart;
-function initialize(){
-    console.log( 'initializing')
+function initialize() {
+    console.log('initializing')
     resetColors();
 
     var ctx = document.getElementById('mainChart').getContext('2d');
@@ -183,7 +188,8 @@ function initialize(){
                     ticks: {
                         beginAtZero: true
                     }
-                }]
+                }],
+                xAxes: [{}]
             }
         }
     });
