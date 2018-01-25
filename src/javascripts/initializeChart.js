@@ -171,7 +171,7 @@ export function initialize() {
             scales: {
                 yAxes: [{
                     scaleLabel: {
-                        display: tru,
+                        display: true,
                         labelString: 'Closing shares'
                     },
                     ticks: {

@@ -236,7 +236,7 @@ __WEBPACK_IMPORTED_MODULE_2__initializeChart_js__["b" /* initialize */]();
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__initializeChart_js__ = __webpack_require__(10);
 
 
-var ws = new WebSocket( 'ws://' + demiacleVars.url );
+var ws = new WebSocket( 'wss://' + demiacleVars.url );
 ws.onmessage = function (event) {
     var response = JSON.parse(event.data)
     console.log(response)

@@ -1,6 +1,6 @@
 import * as chart from './initializeChart.js'
 
-var ws = new WebSocket( 'ws://' + demiacleVars.url );
+var ws = new WebSocket( 'wss://' + demiacleVars.url );
 ws.onmessage = function (event) {
     var response = JSON.parse(event.data)
     console.log(response)
